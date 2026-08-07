@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07090d">
+<meta name="description" content="DriverTakings privacy policy — what we collect, why, and who we share it with.">
+<title>Privacy Policy — DriverTakings</title>
+<style>
+:root{
+  --bg:#07090d;--panel:#111827;--ink:#f8fafc;--muted:#aeb5c0;
+  --line:#2a3545;--gold:#fbbf24;--shadow:0 18px 55px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.shell{width:min(820px,92vw);margin:auto}
+.brand-logo{width:52px;height:52px;object-fit:cover;border-radius:12px}
+.topbar{display:flex;align-items:center;gap:12px;padding:18px 0}
+.eyebrow{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:900}
+h1{font-size:2.1rem;letter-spacing:-.03em;margin:6px 0 4px}
+h2{font-size:1.15rem;letter-spacing:-.01em;margin:28px 0 8px}
+p,li{line-height:1.65;color:#dbe3ec}
+.muted{color:var(--muted);font-size:.86rem}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:26px 28px;box-shadow:var(--shadow);margin:20px 0}
+footer{padding:34px 0;color:#7f8a98;text-align:center;font-size:.76rem}
+footer a{color:#7f8a98}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+  <a href="/" aria-label="DriverTakings home"><img class="brand-logo" src="/drivertakings-logo.png" alt="DriverTakings"></a>
+</header>
+<main>
+  <div class="eyebrow">Legal</div>
+  <h1>Privacy Policy</h1>
+  <p class="muted">Last updated: 7 August 2026</p>
+  <div class="card">
+    <p>DriverTakings ("we", "us") provides income and expense tracking tools for taxi, private-hire, rideshare, courier and delivery drivers, including an optional pathway to HMRC's Making Tax Digital for Income Tax Self Assessment (MTD ITSA) service. This page explains what data we collect, why, and how it is handled.</p>
+
+    <h2>Who we are</h2>
+    <p>DriverTakings is operated as a personal software project. If you have questions about this policy or your data, contact us at <a href="mailto:drivertakings@gmail.com">drivertakings@gmail.com</a>.</p>
+
+    <h2>What we collect</h2>
+    <p>When you create an account we collect your email address and the profile details you choose to add (name, address, vehicle details, National Insurance number if you connect HMRC). As you use DriverTakings we store the daily takings and expense records you enter. If you subscribe to a paid plan, our payment processor Stripe handles your card details directly — we never see or store your card number. If you connect your HMRC account, we store the OAuth connection HMRC issues us (an access token and refresh token) so we can act on your behalf when you ask us to; we never see your Government Gateway password. If you look up your vehicle's MOT status, we send your vehicle registration to DVSA's MOT history service and show you the result; we do not store your MOT history beyond what you ask us to save to your profile.</p>
+
+    <h2>Who we share data with</h2>
+    <ul>
+      <li><strong>Supabase</strong> hosts our database and handles account login (authentication). Your account and records are stored on Supabase's infrastructure.</li>
+      <li><strong>Stripe</strong> processes subscription payments. Stripe's own privacy policy governs the payment details you give them directly.</li>
+      <li><strong>HMRC</strong> receives the income and expense figures you explicitly review and confirm before each submission, if and when you choose to use the MTD submission feature. We currently connect to HMRC's sandbox (test) environment while our production access is under review; no real submissions reach HMRC's live tax systems yet. We never submit anything to HMRC automatically — every submission requires your explicit confirmation on a review screen showing exactly what will be sent. You can disconnect your HMRC account at any time from the MTD page.</li>
+      <li><strong>DVSA</strong> receives the vehicle registration you enter when you check an MOT status.</li>
+    </ul>
+    <p>We do not sell your data, and we do not share it with anyone else for advertising or marketing purposes.</p>
+
+    <h2>How long we keep data</h2>
+    <p>We keep your account data for as long as your account is active. If you close your account, contact us and we will delete your personal data except where we're required to keep records (for example, financial records HMRC or UK law requires us to retain for a set period).</p>
+
+    <h2>Your rights</h2>
+    <p>Under UK GDPR you can ask to see the personal data we hold about you, ask us to correct it, or ask us to delete it (subject to the record-keeping exception above). Contact us at <a href="mailto:drivertakings@gmail.com">drivertakings@gmail.com</a> to make a request.</p>
+
+    <h2>Security</h2>
+    <p>We use industry-standard measures (encrypted connections, access controls, and reputable infrastructure providers) to protect your data, but no system is completely secure — if you believe your account has been compromised, contact us immediately.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>We may update this policy as DriverTakings changes. We'll update the "last updated" date above when we do.</p>
+  </div>
+</main>
+<footer>DriverTakings · <a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></footer>
+</div>
+</body></html>
