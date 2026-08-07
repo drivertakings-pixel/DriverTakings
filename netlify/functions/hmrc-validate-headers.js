@@ -25,7 +25,7 @@ exports.handler = async (event) => {
     const appToken = await getApplicationToken();
 
     const r = await fetch(`${API_BASE}/test/fraud-prevention-headers/validate`, {
-      method: 'POST',
+      method: 'GET',
       headers: {
         Authorization: 'Bearer ' + appToken,
         Accept: 'application/vnd.hmrc.1.0+json',
