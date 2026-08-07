@@ -1,0 +1,30 @@
+{
+  "version": "2.4.3",
+  "name": "Public Site + Member App",
+  "routes": {
+    "/": "Public homepage + permanent earnings demonstration",
+    "/login/": "Join Free / Member Login only",
+    "/app/": "Authenticated DriverTakings application"
+  },
+  "locked_product_rules": [
+    "The public homepage must always let a visitor experience Takings - Costs = actual earnings without registration.",
+    "Every page has one primary purpose.",
+    "The member area must feel separate and premium, not like a rearranged homepage.",
+    "Successful login redirects to /app/.",
+    "Unauthenticated access to /app/ redirects to /login/.",
+    "Free remains genuinely useful; Business and MTD are shown through restrained locked upgrade cards.",
+    "Free, Business and MTD use one continuous DriverTakings financial record.",
+    "Sophistication belongs behind DriverTakings. Simplicity belongs in front of the driver.",
+    "Member takings entry uses Total Takings, Card and On Account; Cash is calculated automatically.",
+    "Member core dashboard always shows estimated tax provision, Class 4 NI provision and Yours to spend \u2014 estimated.",
+    "Paid entitlement changes the member tier label and removes the Business upgrade card for Business/MTD members.",
+    "Future changes repair or extend the fixed member-dashboard baseline rather than simplifying/recreating it."
+  ],
+  "stripe": {
+    "business": "\u00a33.99/month",
+    "mtd": "\u00a35.99/month",
+    "launch_trial_days": 0,
+    "checkout": "Netlify Function -> Stripe hosted Checkout",
+    "entitlement_sync": "Successful Checkout is server-verified and synced to Supabase; Stripe webhook lifecycle sync remains required for cancellation/renewal state."
+  }
+}

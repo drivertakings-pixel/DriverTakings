@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07090d"><link rel="manifest" href="/manifest.webmanifest">
+<title>DriverTakings — Member access</title>
+<style>
+:root{
+  --bg:#07090d;--panel:#111827;--panel2:#182231;--ink:#f8fafc;--muted:#aeb5c0;
+  --line:#2a3545;--gold:#fbbf24;--gold2:#d6a84a;--green:#34d399;--red:#f87171;
+  --white:#fff;--shadow:0 18px 55px rgba(0,0,0,.28)
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.shell{width:min(1160px,92vw);margin:auto}
+.brand-logo{width:64px;height:64px;object-fit:cover;border-radius:14px;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 0}
+.nav-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;border-radius:11px;border:1px solid transparent;padding:11px 16px;font-weight:850;min-height:44px}
+.btn.primary{background:var(--gold);color:#111827}
+.btn.primary:hover{background:#f59e0b}
+.btn.secondary{border-color:#475569;background:transparent;color:#fff}
+.btn.secondary:hover{background:rgba(255,255,255,.06)}
+.btn.dark{background:#0f172a;color:white;border-color:#334155}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.eyebrow{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--gold);font-weight:900}
+h1{font-size:clamp(2.2rem,5vw,4.4rem);line-height:.98;letter-spacing:-.05em;margin:10px 0 14px}
+h2{letter-spacing:-.025em;margin:0 0 12px}
+h3{margin:0 0 8px}
+p{line-height:1.55}
+.lead{font-size:1.08rem;color:var(--muted);max-width:760px}
+.muted{color:var(--muted)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+label{display:flex;flex-direction:column;gap:7px;font-size:.82rem;font-weight:800;color:#dbe3ec}
+input,select{width:100%;background:#fff;color:#111827;border:1px solid #cbd5e1;border-radius:10px;padding:11px 12px;min-height:44px}
+input:focus,select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(251,191,36,.18)}
+.status-msg{display:none;padding:11px 13px;border-radius:11px;margin:12px 0;font-size:.86rem;line-height:1.45}
+.status-msg.ok{display:block;background:#052e26;border:1px solid #166534;color:#bbf7d0}
+.status-msg.err{display:block;background:#3f1212;border:1px solid #7f1d1d;color:#fecaca}
+footer{padding:34px 0;color:#7f8a98;text-align:center;font-size:.76rem}
+@media(max-width:720px){
+  .brand-logo{width:52px;height:52px}
+  .topbar{align-items:flex-start}
+  .nav-actions{justify-content:flex-end}
+}
+
+.auth-shell{min-height:100vh;display:grid;place-items:center;padding:24px}
+.auth-card{width:min(540px,100%);background:linear-gradient(145deg,#111827,#151f2e);border:1px solid #334155;border-radius:22px;padding:28px;box-shadow:0 26px 80px rgba(0,0,0,.38)}
+.auth-brand{display:flex;justify-content:center;margin-bottom:12px}
+.auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}
+.auth-tabs .active{border-color:var(--gold);box-shadow:inset 0 -2px 0 var(--gold)}
+.auth-card form{display:flex;flex-direction:column;gap:13px}
+.checkline{display:grid;grid-template-columns:auto 1fr;align-items:start;gap:9px;font-weight:600;color:#cbd5e1}
+.checkline input{width:auto;min-height:auto;margin-top:3px}
+.smallprint{font-size:.75rem;color:#94a3b8}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<div class="auth-shell">
+<main class="auth-card">
+  <div class="auth-brand"><a href="/"><img class="brand-logo" src="/drivertakings-logo.png" alt="DriverTakings"></a></div>
+  <div class="auth-tabs">
+    <button id="loginTab" class="btn secondary active" type="button">Member login</button>
+    <button id="joinTab" class="btn secondary" type="button">Join free</button>
+  </div>
+  <div id="status" class="status-msg" role="status"></div>
+
+  <form id="loginForm">
+    <div><div class="eyebrow">Your DriverTakings</div><h2>Welcome back</h2><p class="muted">Log in and go straight to your member dashboard.</p></div>
+    <label>Email<input id="loginEmail" type="email" autocomplete="email" required></label>
+    <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+    <button id="loginBtn" class="btn primary" type="submit">Log in</button>
+  </form>
+
+  <form id="joinForm" style="display:none">
+    <div><div class="eyebrow">Free account</div><h2>Start tracking</h2><p class="muted">Keep this part deliberately simple. You can complete business preferences once you're inside.</p></div>
+    <label>First name<input id="joinName" autocomplete="given-name" required></label>
+    <label>Last name<input id="joinLastName" autocomplete="family-name" required></label>
+    <label>Email<input id="joinEmail" type="email" autocomplete="email" required></label>
+    <label>Password<input id="joinPassword" type="password" minlength="8" autocomplete="new-password" required></label>
+    <label class="checkline"><input id="marketingConsent" type="checkbox"><span>I'd like DriverTakings product updates and offers. You can opt out later.</span></label>
+    <button id="joinBtn" class="btn primary" type="submit">Create free account</button>
+    <div class="smallprint">By creating an account you are asking DriverTakings to store your account and financial records in the cloud. Free members have a rolling 60-day accessible history.</div>
+  </form>
+  <p class="smallprint"><a href="/">← Back to the DriverTakings homepage</a></p>
+</main>
+</div>
+
+<script>
+const SUPABASE_URL="https://srmcrwqvqsrjpkrymkth.supabase.co";
+const SUPABASE_KEY="sb_publishable__RUy-86OViF_dqqEACwcBw_U8IgWk77";
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=id=>document.getElementById(id);
+function status(text,ok=false){const el=$('status');el.textContent=text;el.className='status-msg '+(ok?'ok':'err');}
+function setMode(mode){
+  const joining=mode==='join';
+  $('loginForm').style.display=joining?'none':'flex';
+  $('joinForm').style.display=joining?'flex':'none';
+  $('loginTab').classList.toggle('active',!joining);
+  $('joinTab').classList.toggle('active',joining);
+}
+$('loginTab').addEventListener('click',()=>setMode('login'));
+$('joinTab').addEventListener('click',()=>setMode('join'));
+
+async function nativeSignup(email,password,firstName,lastName){
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  try{
+    const res=await fetch(SUPABASE_URL+'/auth/v1/signup',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
+      body:JSON.stringify({email,password,data:{first_name:firstName,last_name:lastName}}),
+      signal:controller.signal,
+      cache:'no-store'
+    });
+    const payload=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(payload.msg||payload.message||payload.error_description||payload.error||('Account creation failed ('+res.status+')'));
+    return payload;
+  }catch(err){
+    if(err && err.name==='AbortError') throw new Error('Account creation timed out. Please try again.');
+    throw err;
+  }finally{clearTimeout(timer);}
+}
+
+$('joinForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=$('joinBtn');btn.disabled=true;btn.textContent='Creating account…';
+  try{
+    const firstName=$('joinName').value.trim(), lastName=$('joinLastName').value.trim(), email=$('joinEmail').value.trim(), password=$('joinPassword').value;
+    await nativeSignup(email,password,firstName,lastName);
+    localStorage.setItem('dt_pending_profile',JSON.stringify({first_name:firstName,last_name:lastName,marketing:$('marketingConsent').checked}));
+    $('loginEmail').value=email;
+    setMode('login');
+    status('Account created. Check your email to confirm it, then log in here.',true);
+  }catch(err){status(err.message||'We could not create the account.');}
+  finally{btn.disabled=false;btn.textContent='Create free account';}
+});
+
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const btn=$('loginBtn');btn.disabled=true;btn.textContent='Logging in…';
+  try{
+    const {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
+    if(error) throw error;
+    if(!data.session) throw new Error('Login did not create a valid session.');
+    location.assign('/app/');
+  }catch(err){status(err.message||'We could not log you in.');}
+  finally{btn.disabled=false;btn.textContent='Log in';}
+});
+
+(async()=>{
+  const {data}=await sb.auth.getSession();
+  if(data.session){location.replace('/app/');return;}
+  setMode(new URLSearchParams(location.search).get('mode')==='join'?'join':'login');
+})();
+</script>
+</body></html>

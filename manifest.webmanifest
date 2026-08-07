@@ -1,0 +1,16 @@
+{
+  "name": "DriverTakings",
+  "short_name": "DriverTakings",
+  "start_url": "/app/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07090d",
+  "theme_color": "#07090d",
+  "icons": [
+    {
+      "src": "/drivertakings-logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
