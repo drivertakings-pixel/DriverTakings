@@ -13,6 +13,7 @@ exports.handler=async(event)=>{
     const body=JSON.parse(event.body||'{}');
     const plan=body.plan;
     if(!['business','mtd'].includes(plan)) return {statusCode:400,body:JSON.stringify({error:'Unknown DriverTakings plan.'})};
+    if(plan==='mtd'&&process.env.MTD_SALES_OPEN!=='true') return {statusCode:403,body:JSON.stringify({error:'MTD is not open for purchase yet — join the waitlist from the MTD page.'})};
     const price=plan==='business'?process.env.STRIPE_PRICE_BUSINESS:process.env.STRIPE_PRICE_MTD;
     const secret=process.env.STRIPE_SECRET_KEY;
     if(!price||!secret) return {statusCode:500,body:JSON.stringify({error:'Stripe is not fully configured on DriverTakings yet.'})};
