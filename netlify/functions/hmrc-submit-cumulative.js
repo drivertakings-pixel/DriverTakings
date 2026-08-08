@@ -76,11 +76,31 @@ exports.handler = async (event) => {
     const periodEnd = body.periodEnd || todayStr;
     const totals = await computeCumulativeTotals(user.id, periodStart, periodEnd);
 
+    // HMRC's real request body nests everything under periodDates/
+    // periodIncome/periodExpenses/periodDisallowableExpenses (confirmed
+    // against the schema in hmrc/self-employment-business-api's own repo,
+    // not assumed) -- a flat top-level body is exactly what produces
+    // "An empty or non-matching body was submitted". Zero-value categories
+    // are omitted rather than sent as 0, matching the review screen's own
+    // filtering and each object's optional-field semantics.
+    const periodExpenses = {};
+    const periodDisallowableExpenses = {};
+    for (const [key, value] of Object.entries(totals.expensesByHmrcField)) {
+      if (!value) continue;
+      if (key.endsWith('Disallowable')) periodDisallowableExpenses[key] = value;
+      else periodExpenses[key] = value;
+    }
+
     const payload = {
-      periodStartDate: totals.periodStart,
-      periodEndDate: totals.periodEnd,
-      turnover: totals.turnover,
-      ...totals.expensesByHmrcField
+      periodDates: {
+        periodStartDate: totals.periodStart,
+        periodEndDate: totals.periodEnd
+      },
+      periodIncome: {
+        turnover: totals.turnover
+      },
+      ...(Object.keys(periodExpenses).length ? {periodExpenses} : {}),
+      ...(Object.keys(periodDisallowableExpenses).length ? {periodDisallowableExpenses} : {})
     };
 
     const fpHeaders = await buildFraudPreventionHeaders(body.signals || {}, event, user.id);
