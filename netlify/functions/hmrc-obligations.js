@@ -41,10 +41,30 @@ exports.handler = async (event) => {
       return {statusCode: r.status, headers: {'Content-Type': 'application/json'}, body: JSON.stringify({error: data?.message || 'HMRC could not return your obligations.'})};
     }
 
+    // HMRC nests the actual period/date fields one level deeper than you'd
+    // expect: obligations[] is one entry per business, each holding an
+    // obligationDetails[] array with the real periodStartDate/periodEndDate/
+    // dueDate/status/receivedDate (confirmed against HMRC's Obligations API
+    // 3.0 spec, not assumed) -- flatten here so the client can stay simple.
+    const flattened = [];
+    for (const biz of (data.obligations || [])) {
+      for (const d of (biz.obligationDetails || [])) {
+        flattened.push({
+          businessId: biz.businessId,
+          typeOfBusiness: biz.typeOfBusiness,
+          periodStartDate: d.periodStartDate,
+          periodEndDate: d.periodEndDate,
+          dueDate: d.dueDate,
+          status: d.status,
+          receivedDate: d.receivedDate || null
+        });
+      }
+    }
+
     return {
       statusCode: 200,
       headers: {'Content-Type': 'application/json', 'Cache-Control': 'no-store'},
-      body: JSON.stringify({obligations: data.obligations || []})
+      body: JSON.stringify({obligations: flattened})
     };
   } catch (err) {
     console.error('hmrc-obligations error:', err);
