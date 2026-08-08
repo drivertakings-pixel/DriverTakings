@@ -59,6 +59,7 @@ footer{padding:34px 0;color:#7f8a98;text-align:center;font-size:.76rem}
 .smallprint{font-size:.75rem;color:#94a3b8}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.hcaptcha.com/1/api.js?onload=onHcaptchaLoad&render=explicit" async defer></script>
 </head>
 <body>
 <div class="auth-shell">
@@ -74,6 +75,7 @@ footer{padding:34px 0;color:#7f8a98;text-align:center;font-size:.76rem}
     <div><div class="eyebrow">Your DriverTakings</div><h2>Welcome back</h2><p class="muted">Log in and go straight to your member dashboard.</p></div>
     <label>Email<input id="loginEmail" type="email" autocomplete="email" required></label>
     <label>Password<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+    <div id="loginCaptcha"></div>
     <button id="loginBtn" class="btn primary" type="submit">Log in</button>
   </form>
 
@@ -84,6 +86,7 @@ footer{padding:34px 0;color:#7f8a98;text-align:center;font-size:.76rem}
     <label>Email<input id="joinEmail" type="email" autocomplete="email" required></label>
     <label>Password<input id="joinPassword" type="password" minlength="8" autocomplete="new-password" required></label>
     <label class="checkline"><input id="marketingConsent" type="checkbox"><span>I'd like DriverTakings product updates and offers. You can opt out later.</span></label>
+    <div id="joinCaptcha"></div>
     <button id="joinBtn" class="btn primary" type="submit">Create free account</button>
     <div class="smallprint">By creating an account you are asking DriverTakings to store your account and financial records in the cloud. Free members have a rolling 60-day accessible history.</div>
   </form>
@@ -98,24 +101,40 @@ const SUPABASE_KEY="sb_publishable__RUy-86OViF_dqqEACwcBw_U8IgWk77";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 const $=id=>document.getElementById(id);
 function status(text,ok=false){const el=$('status');el.textContent=text;el.className='status-msg '+(ok?'ok':'err');}
+
+const HCAPTCHA_SITEKEY='3b725164-1a20-46a4-b424-8b8018ced1b8';
+let hcaptchaReady=false,loginWidgetId=null,joinWidgetId=null,loginCaptchaToken='',joinCaptchaToken='';
+window.onHcaptchaLoad=function(){hcaptchaReady=true;renderVisibleCaptcha();};
+function renderVisibleCaptcha(){
+  if(!hcaptchaReady||!window.hcaptcha) return;
+  const joining=$('joinForm').style.display!=='none';
+  if(joining&&joinWidgetId===null){
+    joinWidgetId=hcaptcha.render('joinCaptcha',{sitekey:HCAPTCHA_SITEKEY,callback:t=>joinCaptchaToken=t,'expired-callback':()=>joinCaptchaToken='','error-callback':()=>joinCaptchaToken=''});
+  }
+  if(!joining&&loginWidgetId===null){
+    loginWidgetId=hcaptcha.render('loginCaptcha',{sitekey:HCAPTCHA_SITEKEY,callback:t=>loginCaptchaToken=t,'expired-callback':()=>loginCaptchaToken='','error-callback':()=>loginCaptchaToken=''});
+  }
+}
+
 function setMode(mode){
   const joining=mode==='join';
   $('loginForm').style.display=joining?'none':'flex';
   $('joinForm').style.display=joining?'flex':'none';
   $('loginTab').classList.toggle('active',!joining);
   $('joinTab').classList.toggle('active',joining);
+  renderVisibleCaptcha();
 }
 $('loginTab').addEventListener('click',()=>setMode('login'));
 $('joinTab').addEventListener('click',()=>setMode('join'));
 
-async function nativeSignup(email,password,firstName,lastName){
+async function nativeSignup(email,password,firstName,lastName,captchaToken){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),15000);
   try{
     const res=await fetch(SUPABASE_URL+'/auth/v1/signup',{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY},
-      body:JSON.stringify({email,password,data:{first_name:firstName,last_name:lastName}}),
+      body:JSON.stringify({email,password,data:{first_name:firstName,last_name:lastName},gotrue_meta_security:{captcha_token:captchaToken}}),
       signal:controller.signal,
       cache:'no-store'
     });
@@ -130,28 +149,38 @@ async function nativeSignup(email,password,firstName,lastName){
 
 $('joinForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  if(!joinCaptchaToken){status('Please complete the captcha check before creating an account.');return;}
   const btn=$('joinBtn');btn.disabled=true;btn.textContent='Creating account…';
   try{
     const firstName=$('joinName').value.trim(), lastName=$('joinLastName').value.trim(), email=$('joinEmail').value.trim(), password=$('joinPassword').value;
-    await nativeSignup(email,password,firstName,lastName);
+    await nativeSignup(email,password,firstName,lastName,joinCaptchaToken);
     localStorage.setItem('dt_pending_profile',JSON.stringify({first_name:firstName,last_name:lastName,marketing:$('marketingConsent').checked}));
     $('loginEmail').value=email;
     setMode('login');
     status('Account created. Check your email to confirm it, then log in here.',true);
   }catch(err){status(err.message||'We could not create the account.');}
-  finally{btn.disabled=false;btn.textContent='Create free account';}
+  finally{
+    btn.disabled=false;btn.textContent='Create free account';
+    if(window.hcaptcha&&joinWidgetId!==null) hcaptcha.reset(joinWidgetId);
+    joinCaptchaToken='';
+  }
 });
 
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
+  if(!loginCaptchaToken){status('Please complete the captcha check before logging in.');return;}
   const btn=$('loginBtn');btn.disabled=true;btn.textContent='Logging in…';
   try{
-    const {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});
+    const {data,error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value,options:{captchaToken:loginCaptchaToken}});
     if(error) throw error;
     if(!data.session) throw new Error('Login did not create a valid session.');
     location.assign('/app/');
   }catch(err){status(err.message||'We could not log you in.');}
-  finally{btn.disabled=false;btn.textContent='Log in';}
+  finally{
+    btn.disabled=false;btn.textContent='Log in';
+    if(window.hcaptcha&&loginWidgetId!==null) hcaptcha.reset(loginWidgetId);
+    loginCaptchaToken='';
+  }
 });
 
 (async()=>{
