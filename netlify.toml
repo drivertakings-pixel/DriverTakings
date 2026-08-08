@@ -3,3 +3,7 @@
 
 [functions]
   node_bundler = "esbuild"
+
+# Every Monday 07:00 UTC (08:00 BST) -- see netlify/functions/weekly-recap-email.js
+[functions."weekly-recap-email"]
+  schedule = "0 7 * * 1"
